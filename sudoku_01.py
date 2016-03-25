@@ -89,10 +89,55 @@ LTLSPEC
     return code
 
 
-if __name__ == '__main__':
-    prob = load_problem('sample.txt')
-    source = gen_code(gen_matrix(prob), get_selected(prob), get_modified(prob))
+def print_board(board: [[int or str]]):
+    for i in range(N):
+        print(' '.join(map(str, board[i])))
 
-    with open('test.smv', 'w') as f:
-        f.write(source)
+
+if __name__ == '__main__':
+    import sys
+
+    if len(sys.argv) >= 2:
+        input_file = sys.argv[1]
+    else:
+        print('Usage: python %s <input_file>')
+        sys.exit(1)
+
+    prob = load_problem(input_file)
+    # show problem
+    print('-> problem <-')
+    print_board(prob)
+
+    # construct model
+    src = gen_code(gen_matrix(prob), get_selected(prob), get_modified(prob))
+    with open('tmp.smv', 'w') as f:
+        f.write(src)
         f.close()
+
+    # call NuSMV
+    import os
+
+    print('running NuSMV...')
+    os.system('NuSMV -bmc tmp.smv > tmp.out')
+    print('done')
+
+    # read output
+    with open('tmp.out', 'r') as f:
+        content = f.read()
+        f.close()
+
+    # parse output
+    import re
+
+    pat = re.compile(r'select(?P<index>\d+) = (?P<val>\d+)')
+    answer = prob
+
+    for match in pat.finditer(content):
+        val = int(match.group('val'))
+        idx, num = divmod(val, N)
+        row, col = divmod(idx, N)
+        answer[row][col] = num + 1
+
+    # display answer
+    print('-> answer <-')
+    print_board(answer)
