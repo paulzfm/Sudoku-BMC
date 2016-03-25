@@ -2,6 +2,12 @@
 
 Using NuSMV bounded model checker to solve sudoku.
 
+### Prerequisite
+
+NuSMV 2.5 or higher version should be pre-installed.
+
+Make sure that `NuSMV` command is in your system PATH.
+
 ### Usage
 
 #### The naive solver (faster)
