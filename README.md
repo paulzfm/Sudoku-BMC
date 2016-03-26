@@ -20,7 +20,7 @@ Options `-on | -off` mean whether to apply optimising strategy on NuSMV model co
 
 	python3 sudoku_01.py <input_file>
 
-Notice that the input file show be in format like:
+Notice that the input file should be in format like:
 
 ```
 5 3 0 0 7 0 0 0 0
@@ -34,7 +34,7 @@ Notice that the input file show be in format like:
 0 0 0 0 8 0 0 7 9
 ```
 
-where 0 denotes the blanks to be filled in. See `testcases/` for more examples.
+where 0 denotes the blanks need to be filled in. See `testcases/` for more examples.
 
 ### Theory
 
