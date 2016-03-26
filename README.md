@@ -35,3 +35,7 @@ Notice that the input file show be in format like:
 ```
 
 where 0 denotes the blanks to be filled in. See `testcases/` for more examples.
+
+### Theory
+
+See [report](https://github.com/paulzfm/Sudoku-BMC/blob/master/doc/report.pdf) for details.
