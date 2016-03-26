@@ -1,0 +1,229 @@
+\documentclass[11pt]{beamer}
+\usetheme{Madrid}
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\setbeamercolor{structure}{fg=darkgreen!90!black}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+% fonts
+\usepackage{xeCJK}
+\setCJKmainfont[BoldFont=SimHei]{SimHei}
+\setCJKfamilyfont{hei}{SimHei}
+\setCJKfamilyfont{kai}{KaiTi}
+\setCJKfamilyfont{fang}{FangSong}
+\newcommand{\hei}{\CJKfamily{hei}}
+\newcommand{\kai}{\CJKfamily{kai}}
+\newcommand{\fang}{\CJKfamily{fang}}
+
+\renewcommand{\r}{\alert}
+\renewcommand{\t}{\texttt}
+
+\setmonofont{Monaco}[Scale=0.85]
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize\ttfamily}
+
+\theoremstyle{definition}
+\newtheorem{exmp}{Example}[section]
+\newtheorem{alte}{Alternative}[section]
+
+\usepackage{extarrows}
+
+\begin{document}
+
+% credits
+\title{BMC meets Sudoku}
+\author[朱俸民]{朱俸民}
+\institute[CST]{Department of Computer Science and Technology, \\ Tsinghua University}
+\date{\today}
+
+% contents
+\AtBeginSection[]
+{
+    \begin{frame}{Contents}
+    	\tableofcontents[currentsection]
+	\end{frame}
+}
+
+% titlepage
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Overview}
+    \tableofcontents
+\end{frame}
+
+\section{The Naive Model}
+
+\begin{frame}{Sudoku Game}
+    \begin{itemize}
+        \item $9 \times 9$ board
+        \item every cell should be filled in with a number range 1 to 9
+        \item some cells are already given
+        \item numbers 1 to 9 should appear in
+        \begin{itemize}
+            \item each row
+            \item each column
+            \item each $3 \times 3$ box
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Formalization}
+    \begin{itemize}
+        \item Let \r{problem} $P$ be a $9 \times 9$ matrix, each cell $p_{ij} \in \{0, 1, \ldots, 9\}$ for $i=0,1,\ldots,8$.
+        \item Let \r{model} $B$ be a $9 \times 9$ matrix, where $$b_{ij} = \left\{
+            \begin{array}{ll}
+                x, & p_{ij}=0 \\
+                p_{ij}, & p_{ij} \not=0 \\
+            \end{array}
+        \right.$$ where $x \in \{1, 2, \dots, 9\}$.
+        \item Find some $B$, say $B^*$, satisfying \r{specification} $b_{i_1 j_1}^* \not= b_{i_2 j_2}^*$ for all pairs $(i_1 j_1, i_2 j_2)$ that have \textbf{conflict}, here, $i_1, j_1, i_2, j_2=0,1,\ldots,8$.
+    \end{itemize}
+    \pause
+    \begin{definition}
+        Pair $(i_1 j_1, i_2 j_2)$ has \textbf{conflict} if $i_1 \not= i_2 \vee j_1 \not= j_2$, and
+        \begin{itemize}
+            \item $i_1 = i_2$, or
+            \item $j_1 = j_2$, or
+            \item $div(i_1, 3) = div(i_2, 3) \wedge div(j_1, 3) = div(j_2, 3)$.
+        \end{itemize}
+    \end{definition}
+\end{frame}
+
+\begin{frame}[fragile]{SMV Description}
+    \begin{lstlisting}
+MODULE main
+VAR
+    board: array 0..80 of 1..9;
+
+ASSIGN
+    board[0] := {5};
+    board[1] := {3};
+    board[2] := {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    ...
+
+LTLSPEC
+    !G (board[0] != board[1] & board[0] != board[2] & ...);
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Solution}
+    \begin{itemize}
+        \item If a counter-example is found, then the counter-example itself presents one solution.
+        \item Else, no solution for the problem.
+    \end{itemize}
+\end{frame}
+
+\section{Optimised Naive Model}
+
+\begin{frame}{Motivation}
+    \begin{itemize}
+        \item $b_{02} \in \{1, 2, 3, 4, 5, 6, 7, 8, 9\}$
+        \item<2-> $5, 3, 7, 8, 6, 9 \not\in b_{02}$
+        \item<3-> $b_{02} \in \{1, 2, 4\}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Optimizing}
+    \begin{definition}
+        Given a problem $P$, the \textbf{candidate set} for cell $p_{ij}$ $$CS(p_{ij}) = \left\{
+            \begin{array}{ll}
+                U - E, & p_{ij}=0 \\
+                \{p_{ij}\}, & p_{ij} \not=0 \\
+            \end{array}
+        \right.$$ where $U=\{1, 2, \ldots, 9\}$ and $E=\{p_{i'j'} \lvert (ij, i'j') \mbox{ has conflict} \wedge p_{i'j'} \not=0, i', j' \in \{0, 1, \ldots, 8\}\}$.
+    \end{definition}
+    \pause
+    \begin{enumerate}
+        \item Compute candidate sets for each cell in $P$;
+        \item Find all cells $p_{ij}$ which $PS(p_{ij})={a}$ where $a \in \{1, 2, \ldots, 9\}$, $p_{ij} \leftarrow a$;
+        \item Goto step 1 until $P$ no longer changes.
+    \end{enumerate}
+\end{frame}
+
+\section{The 0-1 Coverage Model}
+
+\begin{frame}{Redefine Board}
+    \begin{itemize}
+        \item Given a previous-defined board $B$.
+        \item Let $S=(s_0, s_1, \ldots, s_{728})$, $s_t \in \{0, 1\}$.
+        \item $s_{9(9i + j) + k} = 1$ iff $b_{ij} = k + 1$. Here, $i,j,k=0, 1, \ldots, 8$.
+    \end{itemize}
+    \begin{definition}
+        $S$ is a board if
+        \begin{itemize}
+            \item $\lvert (s_0, s_1, \ldots, s_8) \rvert = 1$, and
+            \item $\lvert (s_9, s_{10}, \ldots, s_{17}) \rvert = 1$, and
+            \item $\ldots$
+            \item $\lvert (s_{720}, s_{721}, \ldots, s_{728}) \rvert = 1$.
+        \end{itemize}
+    \end{definition}
+\end{frame}
+
+\begin{frame}{The Rules}
+    \begin{itemize}
+        \item Given the fact $b_{ij}=k+1$.
+        \item Let $R^{9(9i + j) + k}=(r_0, r_1, \ldots, r_{242})$, $r_t \in \{0, 1\}$.
+        \item Case
+        \begin{itemize}
+            \item when $0 \le t < 81$, $\exists p, q (p,q=0,1,\ldots, 8)$ s.t. $t=9p+q$. $r_t=1$ iff number $q+1$ appears on row \#$p$;
+            \item when $81 \le t < 162$, $\exists p, q (p,q=0,1,\ldots, 8)$ s.t. $t=81+9p+q$. $r_t=1$ iff number $q+1$ appears on col \#$p$;
+            \item when $162 \le t < 243$, $\exists p, q (p,q=0,1,\ldots, 8)$ s.t. $t=162+9p+q$. $r_t=1$ iff number $q+1$ appears on box \#$p$.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{The Goal}
+    \begin{itemize}
+        \item Construct a $728 \times 243$ matrix $$M = \left(
+        \begin{array}{c}
+            R^{0} \\
+            R^{1} \\
+            \cdots \\
+            R^{728} \\
+        \end{array}\right).$$
+        \item Our goal is to find a board $S$, select 81 rows \#$i$ from $M$ if $s_i=1$ s.t. $1$ appears in each column of the selected sub matrix.
+    \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item Tell the model checker \r{what to do} rather than how to do.
+        \item \r{Bounded model checking} works well for Sudoku.
+        \item The \r{simpler}, the faster.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+    \begin{itemize}
+        \item NuSMV 2.6 User Manual. \url{http://nusmv.fbk.eu/NuSMV/userman/v26/nusmv.pdf}.
+        \item Sudoku as a SAT Problem. \url{http://sat.inesc-id.pt/~ines/publications/aimath06.pdf}.
+        \item 算法实践——舞蹈链（Dancing Links）算法求解数独. \url{http://www.cnblogs.com/grenet/p/3163550.html}.
+        \item DLSS. \url{https://github.com/paulzfm/DLSS}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\huge \color{darkgreen}
+            Thank you!
+        }
+    \end{center}
+
+    \begin{center}
+        {\huge \color{darkgreen}
+            Any questions?
+        }
+    \end{center}
+\end{frame}
+
+\end{document}
+
+
