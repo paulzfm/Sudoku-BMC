@@ -70,18 +70,10 @@ def gen_spec(board: [[int]]) -> str:
     all_specs = []
     for idx in range(N * N):
         row, col = divmod(idx, N)
-        if opt:
-            if board[row][col] == 0:
-                all_specs.extend(['board[%i] != board[%i]' % (idx, other)
-                                  for other in get_conflicts(idx)
-                                  if other > idx and board[to_row(other)][to_col(other)] == 0])
-        else:
-            all_specs.extend(['board[%i] != board[%i]' % (idx, other)
-                              for other in get_conflicts(idx) if other > idx])
+        all_specs.extend(['board[%i] != board[%i]' % (idx, other)
+                          for other in get_conflicts(idx) if other > idx])
 
-    if all_specs:
-        return ' & '.join(all_specs)
-    return 'TRUE'
+    return ' & '.join(all_specs)
 
 
 def print_board(board: [[int or str]]):
