@@ -60,22 +60,29 @@
 \section{The Naive Model}
 
 \begin{frame}{Sudoku Game}
-    \begin{itemize}
-        \item $9 \times 9$ board
-        \item every cell should be filled in with a number range 1 to 9
-        \item some cells are already given
-        \item numbers 1 to 9 should appear in
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.4]{sample}
+        \end{center}
+        \column{.5\textwidth}
         \begin{itemize}
-            \item each row
-            \item each column
-            \item each $3 \times 3$ box
+            \item $9 \times 9$ board
+            \item every cell should be filled in with a number range 1 to 9
+            \item some cells are already given
+            \item numbers 1 to 9 should appear in
+            \begin{itemize}
+                \item each row
+                \item each column
+                \item each $3 \times 3$ box
+            \end{itemize}
         \end{itemize}
-    \end{itemize}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Formalization}
     \begin{itemize}
-        \item Let \r{problem} $P$ be a $9 \times 9$ matrix, each cell $p_{ij} \in \{0, 1, \ldots, 9\}$ for $i=0,1,\ldots,8$.
+        \item Let \r{problem} $P$ be a $9 \times 9$ matrix, each cell $p_{ij} \in \{0, 1, \ldots, 9\}$ for $i, j=0,1,\ldots,8$.
         \item Let \r{model} $B$ be a $9 \times 9$ matrix, where $$b_{ij} = \left\{
             \begin{array}{ll}
                 x, & p_{ij}=0 \\
@@ -122,11 +129,18 @@ LTLSPEC
 \section{Optimised Naive Model}
 
 \begin{frame}{Motivation}
-    \begin{itemize}
-        \item $b_{02} \in \{1, 2, 3, 4, 5, 6, 7, 8, 9\}$
-        \item<2-> $5, 3, 7, 8, 6, 9 \not\in b_{02}$
-        \item<3-> $b_{02} \in \{1, 2, 4\}$
-    \end{itemize}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.4]{sample}
+        \end{center}
+        \column{.5\textwidth}
+        \begin{itemize}
+            \item $b_{02} \in \{1, 2, 3, 4, 5, 6, 7, 8, 9\}$
+            \item<2-> $5, 3, 7, 8, 6, 9 \not\in b_{02}$
+            \item<3-> $b_{02} \in \{1, 2, 4\}$
+        \end{itemize}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Optimizing}
@@ -148,14 +162,14 @@ LTLSPEC
 
 \section{The 0-1 Coverage Model}
 
-\begin{frame}{Redefine Board}
+\begin{frame}{Redefine Model}
     \begin{itemize}
-        \item Given a previous-defined board $B$.
+        \item Given a previous-defined model $B$.
         \item Let $S=(s_0, s_1, \ldots, s_{728})$, $s_t \in \{0, 1\}$.
         \item $s_{9(9i + j) + k} = 1$ iff $b_{ij} = k + 1$. Here, $i,j,k=0, 1, \ldots, 8$.
     \end{itemize}
     \begin{definition}
-        $S$ is a board if
+        $S$ is a model if
         \begin{itemize}
             \item $\lvert (s_0, s_1, \ldots, s_8) \rvert = 1$, and
             \item $\lvert (s_9, s_{10}, \ldots, s_{17}) \rvert = 1$, and
@@ -167,7 +181,7 @@ LTLSPEC
 
 \begin{frame}{The Rules}
     \begin{itemize}
-        \item Given the fact $b_{ij}=k+1$.
+        \item Given the fact that $b_{ij}=k+1$.
         \item Let $R^{9(9i + j) + k}=(r_0, r_1, \ldots, r_{242})$, $r_t \in \{0, 1\}$.
         \item Case
         \begin{itemize}
@@ -187,7 +201,7 @@ LTLSPEC
             \cdots \\
             R^{728} \\
         \end{array}\right).$$
-        \item Our goal is to find a board $S$, select 81 rows \#$i$ from $M$ if $s_i=1$ s.t. $1$ appears in each column of the selected sub matrix.
+        \item Our goal is to find a model $S$, select 81 rows \#$i$ from $M$ if $s_i=1$ s.t. $1$ appears in each column of the selected submatrix.
     \end{itemize}
 \end{frame}
 
